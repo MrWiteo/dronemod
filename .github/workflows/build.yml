@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,3 +24,7 @@ jobs:
         with:
           name: dronemod-jar
           path: build/libs/*.jar
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "build-${{ github.run_number }}" build/libs/*.jar --title "Build ${{ github.run_number }}" --notes "Automated build"
