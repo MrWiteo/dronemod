@@ -1,0 +1,23 @@
+plugins {
+    id "java"
+    id "net.neoforged.moddev" version "2.0.78"
+}
+
+version = "1.0.0"
+group = "com.example.dronemod"
+base { archivesName = "dronemod" }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories { mavenCentral() }
+
+neoForge {
+    version = "21.1.172"
+    runs {
+        client { client() }
+        server { server() }
+    }
+    mods {
+        dronemod { sourceSet sourceSets.main }
+    }
+}

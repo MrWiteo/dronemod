@@ -1,0 +1,4 @@
+{
+  "drone.flight": { "sounds": [ { "name": "dronemod:drone_flight", "stream": true, "attenuation_distance": 48 } ] },
+  "drone.explosion": { "sounds": [ { "name": "dronemod:drone_explosion", "attenuation_distance": 64 } ] }
+}
