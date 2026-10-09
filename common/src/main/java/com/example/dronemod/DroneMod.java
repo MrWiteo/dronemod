@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -22,16 +23,18 @@ import net.minecraft.world.level.Level;
 public final class DroneMod {
     public static final String MODID = "dronemod";
 
-    // Average delay between drone raids: MIN..MIN+RANGE ticks (20 ticks = 1 sec)
-    private static final int RAID_MIN_TICKS = 6000;   // 5 min
-    private static final int RAID_RANGE_TICKS = 18000; // + up to 15 min
+    // A drone flies in every RAID_INTERVAL_TICKS (20 ticks = 1 sec) for each player in the Overworld.
+    private static final int RAID_INTERVAL_TICKS = 6000;  // 5 min
+    // Chance that a drone attacks the player instead of just flying past towards the nearest village.
+    private static final double ATTACK_CHANCE = 0.10;
+    private static final int VILLAGE_SEARCH_CHUNKS = 48;
 
     // Filled in by the loader entry points at registration time.
     public static Supplier<EntityType<DroneEntity>> DRONE;
     public static Supplier<SoundEvent> FLIGHT;
     public static Supplier<Holder<SoundEvent>> EXPLOSION;
 
-    private static int raidTimer = 3000 + ThreadLocalRandom.current().nextInt(RAID_RANGE_TICKS);
+    private static int raidTimer = RAID_INTERVAL_TICKS;
 
     private DroneMod() {}
 
@@ -55,24 +58,38 @@ public final class DroneMod {
     /** Call once per server tick (end of tick). */
     public static void onServerTick(MinecraftServer server) {
         if (--raidTimer > 0) return;
-        raidTimer = RAID_MIN_TICKS + ThreadLocalRandom.current().nextInt(RAID_RANGE_TICKS);
+        raidTimer = RAID_INTERVAL_TICKS;
 
         List<ServerPlayer> players = server.getPlayerList().getPlayers().stream()
                 .filter(p -> p.level().dimension() == Level.OVERWORLD && !p.isSpectator()).toList();
-        if (players.isEmpty()) return;
+        for (ServerPlayer pl : players) {
+            spawnRaid(pl);
+        }
+    }
 
-        ThreadLocalRandom rnd = ThreadLocalRandom.current();
-        ServerPlayer pl = players.get(rnd.nextInt(players.size()));
+    /** A drone appears to the west of the player. 10%: it circles over the player and attacks, otherwise it flies on towards the nearest village. */
+    private static void spawnRaid(ServerPlayer pl) {
         ServerLevel level = pl.serverLevel();
-        double ang = rnd.nextDouble() * Math.PI * 2;
-        double x = pl.getX() + Math.cos(ang) * 64;
-        double z = pl.getZ() + Math.sin(ang) * 64;
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        double x = pl.getX() - 64;
+        double z = pl.getZ() + (rnd.nextDouble() - 0.5) * 40;
         double y = Math.min(pl.getY() + 45, level.getMaxBuildHeight() - 5);
         if (!level.hasChunkAt(BlockPos.containing(x, y, z))) return;
 
         DroneEntity d = DRONE.get().create(level);
         if (d == null) return;
         d.moveTo(x, y, z, 0f, 0f);
+
+        if (rnd.nextDouble() < ATTACK_CHANCE) {
+            d.startHunt();
+        } else {
+            BlockPos village = level.findNearestMapStructure(StructureTags.VILLAGE, pl.blockPosition(), VILLAGE_SEARCH_CHUNKS, false);
+            if (village != null) {
+                d.startFlyby(village.getX() + 0.5, village.getZ() + 0.5);
+            } else {
+                d.startFlyby(x + 1000, z); // no village around: just fly east
+            }
+        }
         level.addFreshEntity(d);
     }
 }

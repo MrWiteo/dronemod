@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "dronemod",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "Kamikaze Drones",
   "description": "Plane-type drones that randomly dive onto big player builds and blow them up with fire.",
   "license": "MIT",
