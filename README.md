@@ -1,14 +1,42 @@
-# Kamikaze Drones (NeoForge 1.21.1)
+# Kamikaze Drones
 
-Сборка jar (нужны JDK 21 и Gradle 8.10+ и интернет):
+Plane-type drones that randomly fly in, circle high above a player, pick the biggest nearby build and dive into it, blowing it up and setting everything on fire.
 
-    gradle build
+Minecraft **1.21.1**, Java 21. One mod, three loaders:
 
-Готовый файл: build/libs/dronemod-1.0.0.jar -> положить в папку mods (NeoForge 1.21.1).
+| Loader | Jar | Requires |
+| --- | --- | --- |
+| NeoForge | `dronemod-neoforge-1.0.0.jar` | NeoForge 21.1+ |
+| Forge | `dronemod-forge-1.0.0.jar` | Forge 52+ (1.21.1) |
+| Fabric | `dronemod-fabric-1.0.0.jar` | Fabric Loader 0.16+ and Fabric API |
 
-Если Gradle ругается на версию NeoForge, поменяй version в build.gradle на любую 21.1.x
-(список: https://projects.neoforged.net/neoforged/neoforge).
+Download the jar for your loader from the [Releases](../../releases) page and put it into the `mods` folder.
 
-Звуки: src/main/resources/assets/dronemod/sounds (drone_flight.ogg - полёт, drone_explosion.ogg - взрыв).
-Настройки (частота налётов, мощность взрыва, размер постройки) - константы в начале DroneMod.java и DroneEntity.java.
-Проверка: яйцо призыва в креативе или /summon dronemod:drone
+## Gameplay
+
+- A raid starts every 5-20 minutes (on average) for a random player in the Overworld.
+- The drone flies to about 45 blocks above the player, orbits and looks for a dense cluster of non-natural blocks (a base).
+- When it finds one it dives onto it; the explosion is stronger than TNT and leaves fires around.
+- If no build is found, it flies away after 20 minutes.
+- Spawn egg is in the creative inventory (Spawn Eggs tab).
+
+## Project layout
+
+```
+common/     loader-independent code and assets (entity, model, renderer, sounds)
+neoforge/   NeoForge entry point and build
+forge/      Forge entry point and build
+fabric/     Fabric entry point and build
+```
+
+## Building
+
+Needs JDK 21 and Gradle 8.10+. Each loader is a separate Gradle build:
+
+```
+cd neoforge && gradle build     # jar in neoforge/build/libs
+cd forge    && gradle build
+cd fabric   && gradle build
+```
+
+GitHub Actions builds all three on every push and publishes the jars as a release.
