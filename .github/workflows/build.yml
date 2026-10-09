@@ -25,7 +25,17 @@ jobs:
           gradle-version: 8.10.2
       - name: Build ${{ matrix.loader }}
         working-directory: ${{ matrix.loader }}
-        run: gradle build --stacktrace
+        shell: bash
+        run: |
+          set +e
+          gradle build --stacktrace > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            { grep -nE "error:|warning: \\[|What went wrong|Could not|FAILED|Caused by|Exception" -A4 build.log | head -50; echo ----TAIL----; tail -n 25 build.log; } > summary.txt
+            msg=$(sed -e 's/%/%25/g' -e 's/\r//g' summary.txt | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Build failed (${{ matrix.loader }})::${msg}"
+          fi
+          exit $code
       - uses: actions/upload-artifact@v4
         with:
           name: dronemod-${{ matrix.loader }}
