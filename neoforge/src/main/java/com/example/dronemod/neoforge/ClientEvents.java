@@ -1,4 +1,8 @@
-package com.example.dronemod;
+package com.example.dronemod.neoforge;
+
+import com.example.dronemod.DroneMod;
+import com.example.dronemod.DroneModel;
+import com.example.dronemod.DroneRenderer;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -14,6 +18,6 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers e) {
-        e.registerEntityRenderer(DroneMod.DRONE.get(), DroneRenderer::new);
+        e.registerEntityRenderer(DroneModNeoForge.DRONE.get(), DroneRenderer::new);
     }
 }

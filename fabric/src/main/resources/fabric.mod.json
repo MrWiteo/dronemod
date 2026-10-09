@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "dronemod",
+  "version": "1.0.0",
+  "name": "Kamikaze Drones",
+  "description": "Plane-type drones that randomly dive onto big player builds and blow them up with fire.",
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.example.dronemod.fabric.DroneModFabric"],
+    "client": ["com.example.dronemod.fabric.DroneModFabricClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

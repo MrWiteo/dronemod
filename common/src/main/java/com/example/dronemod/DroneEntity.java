@@ -146,7 +146,7 @@ public class DroneEntity extends Mob {
         exploded = true;
         double x = getX(), y = getY(), z = getZ();
         sl.explode(this, null, null, x, y, z, EXPLOSION_POWER, true, Level.ExplosionInteraction.MOB,
-                ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, DroneMod.EXPLOSION);
+                ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, DroneMod.EXPLOSION.get());
         // extra fires around the impact
         for (int i = 0; i < 160; i++) {
             BlockPos p = BlockPos.containing(x + random.nextInt(25) - 12, y + random.nextInt(17) - 8, z + random.nextInt(25) - 12);

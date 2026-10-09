@@ -10,6 +10,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [neoforge, forge, fabric]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -19,12 +23,27 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.10.2
-      - run: gradle build
+      - name: Build ${{ matrix.loader }}
+        working-directory: ${{ matrix.loader }}
+        run: gradle build --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          name: dronemod-jar
-          path: build/libs/*.jar
+          name: dronemod-${{ matrix.loader }}
+          path: ${{ matrix.loader }}/build/libs/dronemod-${{ matrix.loader }}-*.jar
+
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: jars
+          merge-multiple: true
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "build-${{ github.run_number }}" build/libs/*.jar --title "Build ${{ github.run_number }}" --notes "Automated build"
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -l jars
+          gh release create "build-${{ github.run_number }}" jars/*.jar --title "Build ${{ github.run_number }}" --notes "Automated build: NeoForge, Forge and Fabric (Minecraft 1.21.1)"
